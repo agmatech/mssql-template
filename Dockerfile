@@ -11,6 +11,7 @@ COPY --chmod=+x entrypoint.sh /entrypoint.sh
 # Expose the default SQL Server port
 EXPOSE 1433
 
-# Use custom entrypoint (runs as root to fix permissions, then SQL Server switches to mssql user)
+# Ensure entrypoint runs as root to fix permissions
 # Note: Volumes are configured in Railway dashboard, not in Dockerfile
+USER root
 ENTRYPOINT ["/entrypoint.sh"]
