@@ -11,8 +11,6 @@ COPY --chmod=+x entrypoint.sh /entrypoint.sh
 # Expose the default SQL Server port
 EXPOSE 1433
 
-# Declare volume for data persistence
-VOLUME ["/var/opt/mssql"]
-
 # Use custom entrypoint (runs as root to fix permissions, then SQL Server switches to mssql user)
+# Note: Volumes are configured in Railway dashboard, not in Dockerfile
 ENTRYPOINT ["/entrypoint.sh"]

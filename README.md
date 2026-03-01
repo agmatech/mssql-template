@@ -84,11 +84,18 @@ docker rm mssql-2022-railway
 
 ### Volúmenes en Railway
 
-En Railway, los volúmenes persistentes se configuran desde el dashboard:
+**Importante**: Railway no permite usar `VOLUME` en Dockerfiles. Los volúmenes se configuran desde el dashboard:
+
 1. Ve a tu servicio en Railway
-2. Abre la pestaña "Volumes"
-3. Crea un nuevo volumen y mapea `/var/opt/mssql`
-4. Railway manejará automáticamente la persistencia de datos
+2. Abre la pestaña **"Volumes"**
+3. Haz clic en **"New Volume"**
+4. Configura el volumen:
+   - **Mount Path**: `/var/opt/mssql` (este es el path dentro del contenedor)
+   - **Name**: Un nombre descriptivo (ej: `mssql-data`)
+5. Railway montará automáticamente el volumen en `/var/opt/mssql`
+6. El entrypoint ajustará automáticamente los permisos al iniciar
+
+**Nota**: Sin un volumen configurado, todos los datos se perderán al reiniciar el servicio.
 
 ## Conexión
 
