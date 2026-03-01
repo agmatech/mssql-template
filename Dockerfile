@@ -5,9 +5,10 @@ FROM mcr.microsoft.com/mssql/server:2022-latest
 ENV ACCEPT_EULA=Y
 ENV MSSQL_PID=Developer
 
-# Limit SQL Server memory usage to prevent stack overflow
-# Railway typically provides limited resources, so we limit SQL Server memory
-ENV MSSQL_MEMORY_LIMIT_MB=2048
+# SQL Server memory limit (default: 24GB for 32GB systems)
+# Adjust MSSQL_MEMORY_LIMIT_MB via environment variable if needed
+# Recommended: Leave 4-8GB for OS, assign rest to SQL Server
+ENV MSSQL_MEMORY_LIMIT_MB=24576
 
 # Copy entrypoint script with execute permissions
 COPY --chmod=+x entrypoint.sh /entrypoint.sh

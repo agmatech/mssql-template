@@ -12,10 +12,13 @@ Configura las siguientes variables de entorno en tu proyecto de Railway:
 
 **Variables Opcionales:**
 
-- `MSSQL_MEMORY_LIMIT_MB`: Límite de memoria para SQL Server en MB (por defecto: 2048). Ajusta según tu plan de Railway:
-  - Planes básicos: `1024` o `1536`
-  - Planes estándar: `2048` (por defecto)
-  - Planes premium: `4096` o más
+- `MSSQL_MEMORY_LIMIT_MB`: Límite de memoria para SQL Server en MB (por defecto: 24576 para sistemas con 32GB). Ajusta según tu RAM disponible:
+  - **32GB RAM**: `24576` (24GB) - **Configuración por defecto**
+  - 16GB RAM: `12288` (12GB)
+  - 8GB RAM: `6144` (6GB)
+  - 4GB RAM: `2048` (2GB)
+  
+  **Recomendación**: Deja 4-8GB para el sistema operativo y asigna el resto a SQL Server.
 
 **Nota**: El script de entrada mapea automáticamente `SA_PASSWORD` a `MSSQL_SA_PASSWORD` si es necesario.
 
@@ -131,17 +134,39 @@ Si el problema persiste:
 2. Asegúrate de que la variable `SA_PASSWORD` esté configurada con una contraseña segura
 3. Revisa los logs del contenedor en Railway para más detalles
 
-### Error: "Stack Overflow" o "misaligned log IOs"
+### Error: "misaligned log IOs" causando Stack Overflow
+
+**⚠️ PROBLEMA CRÍTICO**: Los misaligned log IOs pueden causar stack overflow e impedir que SQL Server inicie correctamente.
+
+**Causa:**
+- El volumen montado en Railway no está perfectamente alineado con los bloques del sistema de archivos
+- SQL Server intenta hacer demasiadas operaciones I/O síncronas, causando stack overflow
+- Es común en entornos virtualizados como Railway
+
+**Solución implementada:**
+La configuración actual incluye:
+- **Trace flags** para reducir operaciones I/O (`-T1800`, `-T3226`, `-T1117`, `-T1118`, `-T2371`)
+- **Recovery interval** aumentado a 5 minutos para reducir log flushes
+- **Límite de memoria** configurado para prevenir sobrecarga
+- **Optimizaciones** para manejar mejor los IOs en entornos virtualizados
+
+**Si el problema persiste:**
+1. Verifica que el volumen esté correctamente montado en `/var/opt/mssql`
+2. Considera reducir el límite de memoria temporalmente: `MSSQL_MEMORY_LIMIT_MB=16384` (16GB)
+3. Revisa los logs completos en Railway para identificar otros problemas
+
+### Error: "Stack Overflow"
 
 Este error puede ocurrir cuando:
 - SQL Server intenta usar más memoria de la disponible en Railway
-- Hay problemas con el sistema de archivos del volumen montado
 
 **Soluciones:**
 
-1. **Configurar límite de memoria**: La variable `MSSQL_MEMORY_LIMIT_MB` está configurada por defecto a 2048MB. Puedes ajustarla según tu plan de Railway:
+1. **Configurar límite de memoria**: La variable `MSSQL_MEMORY_LIMIT_MB` está configurada por defecto a 24576MB (24GB) para sistemas con 32GB de RAM. Puedes ajustarla según tu RAM disponible:
    ```bash
-   MSSQL_MEMORY_LIMIT_MB=1024  # Para planes con menos memoria
+   MSSQL_MEMORY_LIMIT_MB=24576  # 24GB para sistemas con 32GB RAM (por defecto)
+   MSSQL_MEMORY_LIMIT_MB=12288  # 12GB para sistemas con 16GB RAM
+   MSSQL_MEMORY_LIMIT_MB=6144   # 6GB para sistemas con 8GB RAM
    ```
 
 2. **Usar SQL Server Express**: Si tienes problemas de recursos, considera usar la edición Express que es más ligera:
@@ -152,11 +177,7 @@ Este error puede ocurrir cuando:
 3. **Verificar recursos de Railway**: Asegúrate de que tu plan de Railway tenga suficientes recursos:
    - Mínimo recomendado: 2GB RAM, 2 vCPU
    - Para producción: 4GB+ RAM, 4+ vCPU
-
-4. **Revisar el volumen**: Los "misaligned log IOs" pueden indicar problemas con el volumen. Asegúrate de:
-   - El volumen esté correctamente montado en `/var/opt/mssql`
-   - El volumen tenga suficiente espacio (mínimo 10GB recomendado)
-   - El volumen esté en la misma región que tu servicio
+   - Para sistemas con 32GB: Configuración actual optimizada
 
 ## Notas
 
