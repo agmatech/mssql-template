@@ -10,6 +10,13 @@ Configura las siguientes variables de entorno en tu proyecto de Railway:
   - Al menos 8 caracteres
   - Contiene mayúsculas, minúsculas, números y caracteres especiales
 
+**Variables Opcionales:**
+
+- `MSSQL_MEMORY_LIMIT_MB`: Límite de memoria para SQL Server en MB (por defecto: 2048). Ajusta según tu plan de Railway:
+  - Planes básicos: `1024` o `1536`
+  - Planes estándar: `2048` (por defecto)
+  - Planes premium: `4096` o más
+
 **Nota**: El script de entrada mapea automáticamente `SA_PASSWORD` a `MSSQL_SA_PASSWORD` si es necesario.
 
 ## Deploy en Railway
@@ -123,6 +130,33 @@ Si el problema persiste:
 1. Verifica que el volumen esté mapeado correctamente a `/var/opt/mssql` en Railway
 2. Asegúrate de que la variable `SA_PASSWORD` esté configurada con una contraseña segura
 3. Revisa los logs del contenedor en Railway para más detalles
+
+### Error: "Stack Overflow" o "misaligned log IOs"
+
+Este error puede ocurrir cuando:
+- SQL Server intenta usar más memoria de la disponible en Railway
+- Hay problemas con el sistema de archivos del volumen montado
+
+**Soluciones:**
+
+1. **Configurar límite de memoria**: La variable `MSSQL_MEMORY_LIMIT_MB` está configurada por defecto a 2048MB. Puedes ajustarla según tu plan de Railway:
+   ```bash
+   MSSQL_MEMORY_LIMIT_MB=1024  # Para planes con menos memoria
+   ```
+
+2. **Usar SQL Server Express**: Si tienes problemas de recursos, considera usar la edición Express que es más ligera:
+   ```dockerfile
+   ENV MSSQL_PID=Express
+   ```
+
+3. **Verificar recursos de Railway**: Asegúrate de que tu plan de Railway tenga suficientes recursos:
+   - Mínimo recomendado: 2GB RAM, 2 vCPU
+   - Para producción: 4GB+ RAM, 4+ vCPU
+
+4. **Revisar el volumen**: Los "misaligned log IOs" pueden indicar problemas con el volumen. Asegúrate de:
+   - El volumen esté correctamente montado en `/var/opt/mssql`
+   - El volumen tenga suficiente espacio (mínimo 10GB recomendado)
+   - El volumen esté en la misma región que tu servicio
 
 ## Notas
 

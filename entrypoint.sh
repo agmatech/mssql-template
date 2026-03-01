@@ -53,6 +53,23 @@ echo "Verifying permissions:"
 ls -ld /.system 2>/dev/null || echo "Warning: /.system directory check failed"
 ls -ld /var/opt/mssql 2>/dev/null || echo "Warning: /var/opt/mssql directory check failed"
 
+# Configure SQL Server memory limits if not set
+# This helps prevent stack overflow errors in limited environments like Railway
+if [ -z "$MSSQL_MEMORY_LIMIT_MB" ]; then
+    # Default to 2GB for Railway (adjust based on your Railway plan)
+    export MSSQL_MEMORY_LIMIT_MB=2048
+fi
+
+echo "SQL Server memory limit: ${MSSQL_MEMORY_LIMIT_MB}MB"
+
+# Set additional SQL Server configuration for stability
+# Disable some features that can cause issues in containerized environments
+export MSSQL_AGENT_ENABLED=false
+
+# Start initialization script in background (will configure memory after SQL Server starts)
+/init-sql.sh &
+
 # Start SQL Server
 # The base image will handle switching to the mssql user
+# Note: Memory limit will be configured by init-sql.sh after startup
 exec /opt/mssql/bin/sqlservr
