@@ -11,5 +11,8 @@ COPY --chmod=+x entrypoint.sh /entrypoint.sh
 # Expose the default SQL Server port
 EXPOSE 1433
 
-# Use custom entrypoint
+# Declare volume for data persistence
+VOLUME ["/var/opt/mssql"]
+
+# Use custom entrypoint (runs as root to fix permissions, then SQL Server switches to mssql user)
 ENTRYPOINT ["/entrypoint.sh"]

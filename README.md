@@ -103,6 +103,20 @@ En Railway, los volúmenes persistentes se configuran desde el dashboard:
 Server=tu-host.railway.app,1433;Database=master;User Id=sa;Password=TuPassword;TrustServerCertificate=True;
 ```
 
+## Solución de Problemas
+
+### Error: "The system directory [/.system] could not be created"
+
+Si ves este error en Railway, el entrypoint ya está configurado para solucionarlo automáticamente:
+- Crea el directorio `.system` en `/var/opt/mssql`
+- Ajusta los permisos del volumen montado
+- Crea un symlink o el directorio en la raíz si es necesario
+
+Si el problema persiste:
+1. Verifica que el volumen esté mapeado correctamente a `/var/opt/mssql` en Railway
+2. Asegúrate de que la variable `SA_PASSWORD` esté configurada con una contraseña segura
+3. Revisa los logs del contenedor en Railway para más detalles
+
 ## Notas
 
 - La imagen usa la edición Developer de SQL Server (gratuita para desarrollo)
@@ -111,3 +125,4 @@ Server=tu-host.railway.app,1433;Database=master;User Id=sa;Password=TuPassword;T
 - El contenedor está configurado para reiniciarse automáticamente en caso de fallo
 - **Importante**: Sin un volumen persistente, todos los datos se perderán al eliminar el contenedor
 - El path del volumen debe ser siempre `/var/opt/mssql` dentro del contenedor
+- El entrypoint ajusta automáticamente los permisos del volumen para el usuario `mssql` (UID 10001)
