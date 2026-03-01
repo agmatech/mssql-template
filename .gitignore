@@ -1,3 +1,5 @@
 .env
 *.log
 .DS_Store
+# Directorio de datos local si usas volumen bind mount
+data/

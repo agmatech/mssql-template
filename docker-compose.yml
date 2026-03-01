@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  mssql:
+    build: .
+    container_name: mssql-2022-railway
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${SA_PASSWORD:-YourStrong@Passw0rd2024}
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      # Volumen para persistir datos de las bases de datos
+      # Este es el path estándar donde MSSQL almacena todos sus datos
+      - mssql_data:/var/opt/mssql
+    restart: unless-stopped
+
+volumes:
+  mssql_data:
+    driver: local

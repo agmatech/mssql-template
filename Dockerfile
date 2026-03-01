@@ -5,9 +5,8 @@ FROM mcr.microsoft.com/mssql/server:2022-latest
 ENV ACCEPT_EULA=Y
 ENV MSSQL_PID=Developer
 
-# Copy entrypoint script
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+# Copy entrypoint script with execute permissions
+COPY --chmod=+x entrypoint.sh /entrypoint.sh
 
 # Expose the default SQL Server port
 EXPOSE 1433
