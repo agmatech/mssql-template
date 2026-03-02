@@ -105,6 +105,17 @@ docker rm mssql-2022-railway
 5. Railway montará automáticamente el volumen en `/var/opt/mssql`
 6. El entrypoint ajustará automáticamente los permisos al iniciar
 
+**Configuración de Propietario del Volumen:**
+
+El entrypoint configura automáticamente el propietario del volumen usando:
+- **UID**: `10001` (usuario `mssql`)
+- **GID**: `0` (grupo `root`)
+
+Esto se verifica con: `docker run -it mcr.microsoft.com/mssql/server id mssql`
+Resultado: `uid=10001(mssql) gid=0(root) groups=0(root)`
+
+El comando ejecutado es: `chown 10001:0 /var/opt/mssql`
+
 **Nota**: Sin un volumen configurado, todos los datos se perderán al reiniciar el servicio.
 
 ## Conexión
